@@ -5,6 +5,13 @@ const WEI_PER_ETH = 1_000_000_000_000_000_000n; // Use BigInt for precision
 const WEI_PER_GWEI = 1_000_000_000;
 const SATS_PER_BTC = 100_000_000;
 
+// USD Prices (updated from API)
+let prices = {
+    sol: 0,
+    eth: 0,
+    btc: 0
+};
+
 // DOM Elements
 const solInput = document.getElementById('sol-input');
 const lamportsInput = document.getElementById('lamports-input');
@@ -65,6 +72,63 @@ function formatNumber(num) {
     return parts.join('.');
 }
 
+// Format USD value
+function formatUSD(value) {
+    if (value >= 1000000) {
+        return '$' + (value / 1000000).toFixed(2) + 'M';
+    } else if (value >= 1000) {
+        return '$' + formatNumber(value.toFixed(2));
+    } else if (value >= 1) {
+        return '$' + value.toFixed(2);
+    } else if (value > 0) {
+        return '$' + value.toFixed(6);
+    }
+    return '$0.00';
+}
+
+// Update USD values display
+function updateSolUSD() {
+    const sol = parseFloat(solInput.value) || 0;
+    const usdValue = sol * prices.sol;
+    document.getElementById('sol-usd-value').textContent = formatUSD(usdValue);
+}
+
+function updateEthUSD() {
+    const eth = parseFloat(ethInput.value) || 0;
+    const usdValue = eth * prices.eth;
+    document.getElementById('eth-usd-value').textContent = formatUSD(usdValue);
+}
+
+function updateBtcUSD() {
+    const btc = parseFloat(btcInput.value) || 0;
+    const usdValue = btc * prices.btc;
+    document.getElementById('btc-usd-value').textContent = formatUSD(usdValue);
+}
+
+// Fetch crypto prices from CoinGecko
+async function fetchPrices() {
+    try {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana,ethereum,bitcoin&vs_currencies=usd');
+        const data = await response.json();
+
+        prices.sol = data.solana?.usd || 0;
+        prices.eth = data.ethereum?.usd || 0;
+        prices.btc = data.bitcoin?.usd || 0;
+
+        // Update price displays
+        document.getElementById('sol-price').textContent = formatNumber(prices.sol.toFixed(2));
+        document.getElementById('eth-price').textContent = formatNumber(prices.eth.toFixed(2));
+        document.getElementById('btc-price').textContent = formatNumber(prices.btc.toFixed(0));
+
+        // Update USD values
+        updateSolUSD();
+        updateEthUSD();
+        updateBtcUSD();
+    } catch (error) {
+        console.error('Failed to fetch prices:', error);
+    }
+}
+
 // Event Listeners for Converters
 let isUpdating = false;
 
@@ -73,6 +137,7 @@ solInput.addEventListener('input', (e) => {
     isUpdating = true;
     const sol = parseFloat(e.target.value) || 0;
     lamportsInput.value = sol ? solToLamports(sol) : '';
+    updateSolUSD();
     isUpdating = false;
 });
 
@@ -82,6 +147,7 @@ lamportsInput.addEventListener('input', (e) => {
     const lamports = parseFloat(e.target.value) || 0;
     const sol = lamportsToSol(lamports);
     solInput.value = lamports ? (sol < 0.000001 ? sol.toExponential(6) : sol) : '';
+    updateSolUSD();
     isUpdating = false;
 });
 
@@ -123,6 +189,7 @@ ethInput.addEventListener('input', (e) => {
     isUpdating = true;
     const eth = parseFloat(e.target.value) || 0;
     updateEthSubInput(eth);
+    updateEthUSD();
     isUpdating = false;
 });
 
@@ -130,6 +197,7 @@ ethSubInput.addEventListener('input', (e) => {
     if (isUpdating) return;
     isUpdating = true;
     updateEthFromSubInput(e.target.value);
+    updateEthUSD();
     isUpdating = false;
 });
 
@@ -144,6 +212,7 @@ btcInput.addEventListener('input', (e) => {
     isUpdating = true;
     const btc = parseFloat(e.target.value) || 0;
     satsInput.value = btc ? btcToSats(btc) : '';
+    updateBtcUSD();
     isUpdating = false;
 });
 
@@ -153,6 +222,7 @@ satsInput.addEventListener('input', (e) => {
     const sats = parseFloat(e.target.value) || 0;
     const btc = satsToBtc(sats);
     btcInput.value = sats ? (btc < 0.000001 ? btc.toExponential(6) : btc) : '';
+    updateBtcUSD();
     isUpdating = false;
 });
 
@@ -269,15 +339,16 @@ function updateTimestamp() {
     lastUpdated.textContent = now.toLocaleTimeString();
 }
 
-// Fetch all gas prices
-async function fetchAllGasPrices() {
+// Fetch all gas prices and crypto prices
+async function fetchAllData() {
     // Add spinning animation to refresh button
     refreshBtn.classList.add('animate-spin');
 
     await Promise.all([
         fetchEthereumGas(),
         fetchBitcoinFees(),
-        fetchSolanaFees()
+        fetchSolanaFees(),
+        fetchPrices()
     ]);
 
     updateTimestamp();
@@ -287,8 +358,8 @@ async function fetchAllGasPrices() {
 }
 
 // Refresh button handler
-refreshBtn.addEventListener('click', fetchAllGasPrices);
+refreshBtn.addEventListener('click', fetchAllData);
 
 // Initial fetch and auto-refresh
-fetchAllGasPrices();
-setInterval(fetchAllGasPrices, 30000); // Refresh every 30 seconds
+fetchAllData();
+setInterval(fetchAllData, 30000); // Refresh every 30 seconds

@@ -42,7 +42,14 @@
                                 class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition">
                         </div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-4 text-center">1 SOL = 1,000,000,000 Lamports</p>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-400">USD Value:</span>
+                            <span id="sol-usd-value" class="text-green-400 font-mono">$0.00</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1 text-right">1 SOL = $<span id="sol-price">--</span></p>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 text-center">1 SOL = 1,000,000,000 Lamports</p>
                 </div>
 
                 <!-- ETH / Gwei / Wei Converter -->
@@ -69,7 +76,14 @@
                                 class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
                         </div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-4 text-center">1 ETH = 10⁹ Gwei = 10¹⁸ Wei</p>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-400">USD Value:</span>
+                            <span id="eth-usd-value" class="text-green-400 font-mono">$0.00</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1 text-right">1 ETH = $<span id="eth-price">--</span></p>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 text-center">1 ETH = 10⁹ Gwei = 10¹⁸ Wei</p>
                 </div>
 
                 <!-- BTC / Sats Converter -->
@@ -93,7 +107,14 @@
                                 class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500 transition">
                         </div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-4 text-center">1 BTC = 100,000,000 Satoshis</p>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-400">USD Value:</span>
+                            <span id="btc-usd-value" class="text-green-400 font-mono">$0.00</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1 text-right">1 BTC = $<span id="btc-price">--</span></p>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 text-center">1 BTC = 100,000,000 Satoshis</p>
                 </div>
             </div>
         </section>

@@ -9,8 +9,8 @@ const SATS_PER_BTC = 100_000_000;
 const solInput = document.getElementById('sol-input');
 const lamportsInput = document.getElementById('lamports-input');
 const ethInput = document.getElementById('eth-input');
-const gweiInput = document.getElementById('gwei-input');
-const weiInput = document.getElementById('wei-input');
+const ethSubInput = document.getElementById('eth-sub-input');
+const ethUnitSelect = document.getElementById('eth-unit-select');
 const btcInput = document.getElementById('btc-input');
 const satsInput = document.getElementById('sats-input');
 const refreshBtn = document.getElementById('refresh-btn');
@@ -85,34 +85,58 @@ lamportsInput.addEventListener('input', (e) => {
     isUpdating = false;
 });
 
+// Helper to get current ETH unit
+function getEthUnit() {
+    return ethUnitSelect.value;
+}
+
+// Update sub-input based on ETH value
+function updateEthSubInput(eth) {
+    if (!eth) {
+        ethSubInput.value = '';
+        return;
+    }
+    if (getEthUnit() === 'gwei') {
+        ethSubInput.value = ethToGwei(eth);
+    } else {
+        ethSubInput.value = ethToWei(eth).toString();
+    }
+}
+
+// Update ETH input based on sub-input value
+function updateEthFromSubInput(value) {
+    if (!value) {
+        ethInput.value = '';
+        return;
+    }
+    let eth;
+    if (getEthUnit() === 'gwei') {
+        eth = gweiToEth(parseFloat(value));
+    } else {
+        eth = weiToEth(BigInt(value));
+    }
+    ethInput.value = eth < 0.000001 ? eth.toExponential(6) : eth;
+}
+
 ethInput.addEventListener('input', (e) => {
     if (isUpdating) return;
     isUpdating = true;
     const eth = parseFloat(e.target.value) || 0;
-    gweiInput.value = eth ? ethToGwei(eth) : '';
-    weiInput.value = eth ? ethToWei(eth).toString() : '';
+    updateEthSubInput(eth);
     isUpdating = false;
 });
 
-gweiInput.addEventListener('input', (e) => {
+ethSubInput.addEventListener('input', (e) => {
     if (isUpdating) return;
     isUpdating = true;
-    const gwei = parseFloat(e.target.value) || 0;
-    const eth = gweiToEth(gwei);
-    ethInput.value = gwei ? (eth < 0.000001 ? eth.toExponential(6) : eth) : '';
-    weiInput.value = gwei ? gweiToWei(gwei).toString() : '';
+    updateEthFromSubInput(e.target.value);
     isUpdating = false;
 });
 
-weiInput.addEventListener('input', (e) => {
-    if (isUpdating) return;
-    isUpdating = true;
-    const wei = BigInt(e.target.value || 0);
-    const eth = weiToEth(wei);
-    const gwei = weiToGwei(wei);
-    ethInput.value = wei ? (eth < 0.000001 ? eth.toExponential(6) : eth) : '';
-    gweiInput.value = wei ? gwei : '';
-    isUpdating = false;
+// When dropdown changes, recalculate the sub-input value
+ethUnitSelect.addEventListener('change', () => {
+    const eth = parseFloat(ethInput.value) || 0;
+    updateEthSubInput(eth);
 });
 
 btcInput.addEventListener('input', (e) => {

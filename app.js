@@ -1,6 +1,8 @@
 // Conversion Constants
 const LAMPORTS_PER_SOL = 1_000_000_000;
 const GWEI_PER_ETH = 1_000_000_000;
+const WEI_PER_ETH = 1_000_000_000_000_000_000n; // Use BigInt for precision
+const WEI_PER_GWEI = 1_000_000_000;
 const SATS_PER_BTC = 100_000_000;
 
 // DOM Elements
@@ -8,6 +10,7 @@ const solInput = document.getElementById('sol-input');
 const lamportsInput = document.getElementById('lamports-input');
 const ethInput = document.getElementById('eth-input');
 const gweiInput = document.getElementById('gwei-input');
+const weiInput = document.getElementById('wei-input');
 const btcInput = document.getElementById('btc-input');
 const satsInput = document.getElementById('sats-input');
 const refreshBtn = document.getElementById('refresh-btn');
@@ -28,6 +31,22 @@ function ethToGwei(eth) {
 
 function gweiToEth(gwei) {
     return gwei / GWEI_PER_ETH;
+}
+
+function ethToWei(eth) {
+    return BigInt(Math.round(eth * 1e18));
+}
+
+function weiToEth(wei) {
+    return Number(wei) / 1e18;
+}
+
+function gweiToWei(gwei) {
+    return BigInt(Math.round(gwei * WEI_PER_GWEI));
+}
+
+function weiToGwei(wei) {
+    return Number(wei) / WEI_PER_GWEI;
 }
 
 function btcToSats(btc) {
@@ -71,6 +90,7 @@ ethInput.addEventListener('input', (e) => {
     isUpdating = true;
     const eth = parseFloat(e.target.value) || 0;
     gweiInput.value = eth ? ethToGwei(eth) : '';
+    weiInput.value = eth ? ethToWei(eth).toString() : '';
     isUpdating = false;
 });
 
@@ -80,6 +100,18 @@ gweiInput.addEventListener('input', (e) => {
     const gwei = parseFloat(e.target.value) || 0;
     const eth = gweiToEth(gwei);
     ethInput.value = gwei ? (eth < 0.000001 ? eth.toExponential(6) : eth) : '';
+    weiInput.value = gwei ? gweiToWei(gwei).toString() : '';
+    isUpdating = false;
+});
+
+weiInput.addEventListener('input', (e) => {
+    if (isUpdating) return;
+    isUpdating = true;
+    const wei = BigInt(e.target.value || 0);
+    const eth = weiToEth(wei);
+    const gwei = weiToGwei(wei);
+    ethInput.value = wei ? (eth < 0.000001 ? eth.toExponential(6) : eth) : '';
+    gweiInput.value = wei ? gwei : '';
     isUpdating = false;
 });
 
